@@ -1,0 +1,127 @@
+Для реалізації програми для будівельника ноутбуків з різною конфігурацією, ми можемо використовувати паттерн "Builder" (Будівельник).
+Діаграма класів для цього паттерну може виглядати наступним чином:
+                +--------------+
+                |  Director    |
+                +--------------+
+                      |        |
+                      |        |
+           +----------+--------+---------+
+           |                               |
++----------------------+          +----------------------+
+|   ConcreteBuilder     |          |   Product            |
++----------------------+          +----------------------+
+|  -product: Product    |          |  -part1: String       |
+|  +buildPart1(): void  |          |  -part2: int          |
+|  +buildPart2(): void  |          |  -part3: boolean      |
+|  +getResult(): Product|          |  +display(): void     |
++----------------------+          +----------------------+
+
+Опис класів:
+Director: цей клас визначає порядок кроків, необхідних для побудови продукту. Він працює з будівельником і запускає його методи з правильним порядком.
+ConcreteBuilder: це клас, який реалізує будівельника. Він містить методи для побудови окремих частин продукту. Коли всі частини готові, він збирає їх і повертає результат.
+Product: це клас, що представляє кінцевий продукт, який будівельник будує. Він містить всі необхідні атрибути для ноутбука, такі як тип процесора, об'єм пам'яті і т.д.
+Тепер ми можемо створити програму з візуальним інтерфейсом, яка дозволить користувачу вибирати конфігурацію ноутбука і побачити покрокове виконання патерну. Коли користувач вибирає конфігурацію, програма буде створювати об'єкт ConcreteBuilder та Director. Далі, програма буде викликати методи ConcreteBuilder для додавання частин ноутбука в правильному порядку. Після завершення будівництва, програма викличе метод getResult() у ConcreteBuilder, щоб отримати готовий ноутбук.
+
+Ось приблизний код програми на мові Python, який ілюструє використання паттерна "Builder" для створення ноутбуків з різною конфігурацією:
+# клас Product, що представляє кінцевий продукт
+class Laptop:
+    def __init__(self):
+        self.processor = None
+        self.memory = None
+        self.storage = None
+
+    def display(self):
+        print("Ноутбук з процесором {} , об'ємом пам'яті {} та диском {}".format(
+            self.processor, self.memory, self.storage))
+
+
+# клас Builder, який описує методи для будівництва ноутбука
+class LaptopBuilder:
+    def __init__(self):
+        self.laptop = Laptop()
+
+    def add_processor(self, processor):
+        self.laptop.processor = processor
+
+    def add_memory(self, memory):
+        self.laptop.memory = memory
+
+    def add_storage(self, storage):
+        self.laptop.storage = storage
+
+    def get_laptop(self):
+        return self.laptop
+
+
+# клас Director, який визначає порядок кроків будівництва ноутбука
+class Director:
+    def __init__(self):
+        self.builder = None
+
+    def build_laptop(self, processor, memory, storage):
+        self.builder = LaptopBuilder()
+        self.builder.add_processor(processor)
+        self.builder.add_memory(memory)
+        self.builder.add_storage(storage)
+        return self.builder.get_laptop()
+
+
+# Візуальний інтерфейс
+import tkinter as tk
+
+class LaptopBuilderGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Будівництво ноутбука")
+
+        self.processor_var = tk.StringVar()
+        self.memory_var = tk.StringVar()
+        self.storage_var = tk.StringVar()
+
+        self.processor_var.set("Intel Core i5")
+        self.memory_var.set("8 ГБ")
+        self.storage_var.set("256 ГБ")
+
+        # віджети для вибору конфігурації
+        processor_label = tk.Label(self.master, text="Процесор:")
+        processor_label.grid(row=0, column=0)
+        processor_dropdown = tk.OptionMenu(self.master, self.processor_var,
+                                           "Intel Core i5", "Intel Core i7", "AMD Ryzen 5", "AMD Ryzen 7")
+        processor_dropdown.grid(row=0, column=1)
+
+        memory_label = tk.Label(self.master, text="Пам'ять:")
+        memory_label.grid(row=1, column=0)
+        memory_dropdown = tk.OptionMenu(self.master, self.memory_var, "8 ГБ", "16 ГБ", "32 ГБ")
+        memory_dropdown.grid(row=1, column=1)
+
+        storage_label = tk.Label(self.master, text="Диск:")
+        storage_label.grid(row=2, column=0)
+        storage_dropdown = tk.OptionMenu(self.master, self.storage_var, "256 ГБ", "512 ГБ", "1 ТБ")
+        storage_dropdown.grid(row=2, column=1)
+
+        # кнопка "Побудувати"
+        build_button = tk.Button(self.master, text="Побудувати", command=self.build_laptop)
+        build_button.grid(row=3, column=1)
+
+        # віджет для відображення результату
+        self.result_label = tk.Label(self.master, text="")
+        self.result_label.grid(row=4, column=0, columnspan=2)
+
+    # метод для обробки натиснення кнопки "Побудувати"
+    def build_laptop(self):
+        processor = self.processor_var.get()
+        memory = self.memory_var.get()
+        storage = self.storage_var.get()
+
+        director = Director()
+        laptop = director.build_laptop(processor, memory, storage)
+
+        self.result_label.configure(text="Конфігурація ноутбука: " + laptop.display())
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = LaptopBuilderGUI(root)
+    root.mainloop()
+Цей код створює вікно з трьома випадаючими списками, в яких можна вибрати конфігурацію процесора, пам'яті та диску. Після натиснення кнопки "Побудувати" програма використовує об'єкт Director для побудови ноутбука з вибраною конфігурацією, і відображає результат на екрані.
+Ця програма демонструє, як можна використовувати паттерн "Builder" для створення складних об'єктів з різною конфігурацією. Візуальний інтерфейс дозволяє користувачеві вибирати конфігурацію ноутбука за допомогою випадаючих списків, і після натиснення кнопки "Побудувати" програма відображає кінцевий результат.
+
