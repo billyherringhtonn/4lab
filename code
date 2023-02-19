@@ -1,0 +1,99 @@
+# клас Product, що представляє кінцевий продукт
+class Laptop:
+    def __init__(self):
+        self.processor = None
+        self.memory = None
+        self.storage = None
+
+    def display(self):
+        print("Ноутбук з процесором {} , об'ємом пам'яті {} та диском {}".format(
+            self.processor, self.memory, self.storage))
+
+
+# клас Builder, який описує методи для будівництва ноутбука
+class LaptopBuilder:
+    def __init__(self):
+        self.laptop = Laptop()
+
+    def add_processor(self, processor):
+        self.laptop.processor = processor
+
+    def add_memory(self, memory):
+        self.laptop.memory = memory
+
+    def add_storage(self, storage):
+        self.laptop.storage = storage
+
+    def get_laptop(self):
+        return self.laptop
+
+
+# клас Director, який визначає порядок кроків будівництва ноутбука
+class Director:
+    def __init__(self):
+        self.builder = None
+
+    def build_laptop(self, processor, memory, storage):
+        self.builder = LaptopBuilder()
+        self.builder.add_processor(processor)
+        self.builder.add_memory(memory)
+        self.builder.add_storage(storage)
+        return self.builder.get_laptop()
+
+
+# Візуальний інтерфейс
+import tkinter as tk
+
+class LaptopBuilderGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Будівництво ноутбука")
+
+        self.processor_var = tk.StringVar()
+        self.memory_var = tk.StringVar()
+        self.storage_var = tk.StringVar()
+
+        self.processor_var.set("Intel Core i5")
+        self.memory_var.set("8 ГБ")
+        self.storage_var.set("256 ГБ")
+
+        # віджети для вибору конфігурації
+        processor_label = tk.Label(self.master, text="Процесор:")
+        processor_label.grid(row=0, column=0)
+        processor_dropdown = tk.OptionMenu(self.master, self.processor_var,
+                                           "Intel Core i5", "Intel Core i7", "AMD Ryzen 5", "AMD Ryzen 7")
+        processor_dropdown.grid(row=0, column=1)
+
+        memory_label = tk.Label(self.master, text="Пам'ять:")
+        memory_label.grid(row=1, column=0)
+        memory_dropdown = tk.OptionMenu(self.master, self.memory_var, "8 ГБ", "16 ГБ", "32 ГБ")
+        memory_dropdown.grid(row=1, column=1)
+
+        storage_label = tk.Label(self.master, text="Диск:")
+        storage_label.grid(row=2, column=0)
+        storage_dropdown = tk.OptionMenu(self.master, self.storage_var, "256 ГБ", "512 ГБ", "1 ТБ")
+        storage_dropdown.grid(row=2, column=1)
+
+        # кнопка "Побудувати"
+        build_button = tk.Button(self.master, text="Побудувати", command=self.build_laptop)
+        build_button.grid(row=3, column=1)
+
+        # віджет для відображення результату
+        self.result_label = tk.Label(self.master, text="")
+        self.result_label.grid(row=4, column=0, columnspan=2)
+
+    # метод для обробки натиснення кнопки "Побудувати"
+    def build_laptop(self):
+        processor = self.processor_var.get()
+        memory = self.memory_var.get()
+        storage = self.storage_var.get()
+
+        director = Director()
+        laptop = director.build_laptop(processor, memory, storage)
+
+        self.result_label.configure(text="Конфігурація ноутбука: " + laptop.display())
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = LaptopBuilderGUI(root)
+    root.mainloop()
